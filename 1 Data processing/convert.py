@@ -25,7 +25,7 @@ def main(run_dir,input_dir_images,input_dir_labels,output_dir):
 
     # Process data
     output_np_images = np.expand_dims(input_np_images, axis=3)
-    output_np_labels = input_np_labels#
+    output_np_labels = input_np_labels
 
     # write nparray to hdf5
     write_hdf5(output_dir,output_np_images,output_np_labels)

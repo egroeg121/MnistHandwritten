@@ -1,4 +1,4 @@
-def main(run_dir,train_dir,test_dir,weights_dir):
+def main(run_dir,model_path,train_dir,test_dir,weights_dir):
 
     # Load data from hdf5
     train_images,train_labels = load_data(train_dir)
@@ -11,19 +11,18 @@ def main(run_dir,train_dir,test_dir,weights_dir):
     print("Images: ",test_images.shape,"   Labels: ",test_labels.shape)
 
     # Train data
-    model = train(train_images,train_labels,test_images,test_labels)
+    model = train(model_path,train_images,train_labels,test_images,test_labels)
 
     # Save weights
-    save_weights(model,weights_dir)
+    model.save_weights(weights_dir)
 
-def train(train_images,train_labels,test_images,test_labels):
+def train(model_path,train_images,train_labels,test_images,test_labels):
     from keras import callbacks
     from keras.optimizers import SGD
     from keras.utils import to_categorical
-    import handwritemodel as hwmodel
 
     # Import model
-    model = hwmodel.getModel()
+    model = load_model(model_path)
 
     # compile
     sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
@@ -33,7 +32,7 @@ def train(train_images,train_labels,test_images,test_labels):
     #logger = callbacks.TensorBoard(log_dir='logs', write_graph=True,histogram_freq=5)
 
     # train
-    model.predict(
+    model.fit(
         train_images,
         to_categorical(train_labels),
         epochs=10,
@@ -45,6 +44,14 @@ def train(train_images,train_labels,test_images,test_labels):
     )
 
     return model
+
+def load_model(model_path):
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("module.name", model_path)
+    foo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(foo)
+    return foo.getModel()
 
 
 def load_data(input_dir):
@@ -60,19 +67,10 @@ def load_data(input_dir):
 
     return images,labels
 
-def save_weights(model,weights_dir):
-    import h5py
-
-    weights = model.get_weights()
-    f = h5py.File(weights_dir, "w")
-    weights_dset = f.create_dataset("weights", data=weights)
-    f.close()
-
-
 # If running from terminal
 import sys
-if len(sys.argv) != 4:
+if len(sys.argv) != 5:
     print("ERROR: Incorrect number of Arguments. Input Arguements: ",len(sys.argv))
-    print("Sys Arg: FILE.PY TRAIN_DIR_HDF5 TEST_DIR_HDF5 OUTPUT_WEIGHTS_DIR")
+    print("Sys Arg: [0]FILE.PY [1]MODEL_PATH [2]TRAIN_DIR_HDF5 [3]TEST_DIR_HDF5 [4]OUTPUT_WEIGHTS_DIR")
     exit()
-if __name__ == "__main__": main(sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3])
+if __name__ == "__main__": main(sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4])

@@ -34,6 +34,7 @@ def downsample(array,factor):
         im_resized = Image.fromarray(array[0]).resize( (np.uint(array.shape[1]/factor),np.uint(array.shape[2]/factor)),Image.BILINEAR )
         out_array[i] = np.array(im_resized)
 
+    return out_array
 
 def write_hdf5(directory,images_np,labels_np):
     import h5py

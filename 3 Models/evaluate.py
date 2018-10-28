@@ -1,30 +1,50 @@
-
-
-def main(run_dir,dir):
+def main(run_dir,model_path,weights_dir,data_dir):
 
     # Load data from hdf5
-    images,labels = load_data(dir)
+    data_images, data_labels = load_data(data_dir)
 
     # Display Data sizes
-    print( "Shape of train data:")
-    print("Images: ",images.shape,"   Labels: ",labels.shape)
+    print( "\nShape of data:")
+    print("Images: ",data_images.shape,"   Labels: ",data_labels.shape,"\n")
 
     # Train data
-    evaluate(images,labels)
+    model = evaluate(model_path,weights_dir,data_images,data_labels)
 
-
-
-def evaluate(images,labels):
+def evaluate(model_path,weights_dir,data_images,data_labels):
+    from keras.optimizers import SGD
     from keras.utils import to_categorical
-    import handwritemodel as model
 
     # Import model
-    model = model.getModel()
+    model = load_model(model_path)
+
+    # Load weights
+    model.load_weights(weights_dir)
+
+    # compile
+    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+
+    # Create logger object
+    #logger = callbacks.TensorBoard(log_dir='logs', write_graph=True,histogram_freq=5)
 
     # train
-    model.evaluate(images,
-                   to_categorical(labels),
-                   batch_size=100)
+    loss,acc = model.evaluate(
+        data_images,
+        to_categorical(data_labels),
+        batch_size=500,
+        verbose=1
+    )
+
+    print("\nLoss: ",loss," Accuracy: ",acc)
+    return model
+
+def load_model(model_path):
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("module.name", model_path)
+    foo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(foo)
+    return foo.getModel()
 
 
 def load_data(input_dir):
@@ -40,10 +60,10 @@ def load_data(input_dir):
 
     return images,labels
 
-# If running from terminal rather than as library
+# If running from terminal
 import sys
-if len(sys.argv) != 2:
+if len(sys.argv) != 4:
     print("ERROR: Incorrect number of Arguments. Input Arguements: ",len(sys.argv))
-    print("Sys Arg: FILE.PY INPUT_HDF5")
+    print("Sys Arg: [0]FILE.PY [1]MODEL_PATH [2]WEIGHTS_PATH [3]DATA_PATH")
     exit()
-if __name__ == "__main__": main(sys.argv[0],sys.argv[1])
+if __name__ == "__main__": main(sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3])
