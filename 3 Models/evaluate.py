@@ -1,3 +1,22 @@
+
+'''
+
+GENERAL Description:
+Use previous calculated weights to create predictions for a dataset. Produces probabilities for each class and saves in hdf5
+prints the loss and accuracy of the evaluation
+
+COMMAND LINE ARGUMENTS:
+    [0]RUN_DIR [1]MODEL_PATH [2]WEIGHTS_HDF5_DIR [3]DATA_HDF5_DIR [4]OUTPUT_PREDICTS_DIR
+
+        DIR stands for directory
+        the HDF5 must have an images and labels dataset
+        Model_path is the .py file containg the getModel function
+    Or as module calling the different functions with correct parameters
+
+    To change train parameters like number of epochs etc look at the train function
+'''
+
+
 def main(run_dir,model_path,weights_dir,data_dir):
 
     # Load data from hdf5
@@ -5,10 +24,13 @@ def main(run_dir,model_path,weights_dir,data_dir):
 
     # Display Data sizes
     print( "\nShape of data:")
-    print("Images: ",data_images.shape,"   Labels: ",data_labels.shape,"\n")
+    print("Images: ",data_images.shape,"  Labels: ",data_labels.shape,"\n")
 
-    # Train data
-    model = evaluate(model_path,weights_dir,data_images,data_labels)
+    # Evaluate data
+    loss,accuracy = evaluate(model_path,weights_dir,data_images,data_labels)
+
+    print( "\nEvaluation Results:")
+    print("Loss: ",loss,"  Accuracy: ",accuracy,"\n")
 
 def evaluate(model_path,weights_dir,data_images,data_labels):
     from keras.optimizers import SGD
@@ -28,23 +50,30 @@ def evaluate(model_path,weights_dir,data_images,data_labels):
     #logger = callbacks.TensorBoard(log_dir='logs', write_graph=True,histogram_freq=5)
 
     # train
-    loss,acc = model.evaluate(
+    loss,accuracy = model.evalaute(
         data_images,
-        to_categorical(data_labels),
+        data_labels,
         batch_size=500,
         verbose=1
     )
 
-    print("\nLoss: ",loss," Accuracy: ",acc)
-    return model
+    return loss,accuracy
 
-def load_model(model_path):
+def save_predictions(predictions,predicts_dir):
+    import h5py
+
+    f = h5py.File(predicts_dir, "w")
+    predicts_dset = f.create_dataset("predicts", data=predictions)
+    f.close()
+
+
+def load_model(model_path): # Load the model.py file from model_path. then execute getModel()
     import importlib.util
 
     spec = importlib.util.spec_from_file_location("module.name", model_path)
-    foo = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(foo)
-    return foo.getModel()
+    model = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(model)
+    return model.getModel()
 
 
 def load_data(input_dir):
@@ -64,6 +93,6 @@ def load_data(input_dir):
 import sys
 if len(sys.argv) != 4:
     print("ERROR: Incorrect number of Arguments. Input Arguements: ",len(sys.argv))
-    print("Sys Arg: [0]FILE.PY [1]MODEL_PATH [2]WEIGHTS_PATH [3]DATA_PATH")
+    print("Sys Arg: [0]RUN_DIR [1]MODEL_PATH [2]WEIGHTS_HDF5_DIR [3]DATA_HDF5_DIR")
     exit()
-if __name__ == "__main__": main(sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3])
+if __name__ == "__main__": main(sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3],)

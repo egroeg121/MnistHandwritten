@@ -4,7 +4,7 @@
 PREDICT: Use previous calculated weights to create predictions for a dataset. Produces probabilities for each class and saves in hdf5
     Can be used with command line arguements: [0]RUN_DIR [1]MODEL_PATH [2]WEIGHTS_HDF5_DIR [3]DATA_HDF5_DIR [4]OUTPUT_PREDICTS_DIR
         DIR stands for directory
-        the HDF5 must have an images and labels dataset
+        the HDF5 must have an images dataset
     Or as module calling the different functions with correct parameters
 
 '''
@@ -13,11 +13,11 @@ PREDICT: Use previous calculated weights to create predictions for a dataset. Pr
 def main(run_dir,model_path,weights_dir,data_dir,predicts_dir):
 
     # Load data from hdf5
-    data_images, data_labels = load_data(data_dir)
+    data_images = load_data(data_dir)
 
     # Display Data sizes
     print( "\nShape of data:")
-    print("Images: ",data_images.shape,"   Labels: ",data_labels.shape,"\n")
+    print("Images: ",data_images.shape,"\n")
 
     # Train data
     predictions = predict(model_path,weights_dir,data_images)
@@ -77,9 +77,8 @@ def load_data(input_dir):
         exit()
 
     images = f['images']
-    labels = f['labels']
 
-    return images,labels
+    return images
 
 # If running from terminal
 import sys
