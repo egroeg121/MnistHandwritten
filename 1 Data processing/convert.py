@@ -1,20 +1,19 @@
-import numpy as np
-
 '''
 GENERAL DESCRIPTION:
-	Each file converts 2 ubytes files into one hdf5 file containg two datasets: 'images' and 'labels'
+    Does data processing on the the data. What kind of data processing is used by the PROCESSING_FUNCTION.py
+	Each file converts 2 ubytes files into one hdf5 file containg two datasets: 'images' and 'labels'.
+
 
 COMMAND LINE ARGUMENTS:
-	FILE_NAME INPUT_IMAGES INPUT_LABELS OUTPUT_DIRECTORY
+	FILE_NAME PROCESSING_FUNCTION INPUT_IMAGES INPUT_LABELS OUTPUT_DIRECTORY
 
-
-FILES:
-	No_Processing : does not processing on the dataset, just converts the ubytes into hdf5
+PROCESSING_FUNCTION:
+    must have a process_images taking arguments of array and process_labels taking arguments of an array
 
 '''
 
 
-def main(run_dir,input_dir_images,input_dir_labels,output_dir):
+def main(run_dir,processing_func,input_dir_images,input_dir_labels,output_dir):
 
     # get np array from ubytes
     print("Loading Data")
@@ -23,14 +22,23 @@ def main(run_dir,input_dir_images,input_dir_labels,output_dir):
     print("Images data shape: ",input_np_images.shape)
     print("Labels data shape: ", input_np_labels    .shape)
 
-    # Process data
-    output_np_images = np.expand_dims(input_np_images, axis=3)
+    # Process images
+    output_np_images = im_process(input_np_images,processing_func)
     output_np_labels = input_np_labels
 
     # write nparray to hdf5
     write_hdf5(output_dir,output_np_images,output_np_labels)
 
     print("DONE")
+
+def im_process(input_np_images,processing_func):
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("module.name", processing_func)
+    foo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(foo)
+    return foo.process_images(input_np_images)
+
 
 def write_hdf5(directory,images_np,labels_np):
     import h5py
@@ -69,8 +77,8 @@ def read_ubyte(filename):
 
 # Runs at the start of the program
 import sys
-if len(sys.argv) != 4:
+if len(sys.argv) != 5:
     print("ERROR: Incorrect number of Arguments. Input Arguements: ",len(sys.argv))
-    print("Sys Arg: FILE.PY INPUT_DIRECTORY_IMAGES INPUT_DIRECTORY_LABELS OUTPUT_DIRECTORY")
+    print("Sys Arg: FILE_NAME PROCESSING_FUNCTION INPUT_IMAGES INPUT_LABELS OUTPUT_DIRECTORY")
     exit()
-if __name__ == "__main__": main(sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3])
+if __name__ == "__main__": main(sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4])

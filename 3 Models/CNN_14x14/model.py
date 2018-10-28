@@ -14,11 +14,12 @@ def getModel():
     model.add(MaxPooling2D(pool_size=(2, 2), name='pool1'))
     model.add(Dropout(0.25, name='dropout1'))
 
+    model.add(Conv2D(64, (3, 3), activation='relu', name='conv3'))
+    model.add(MaxPooling2D(pool_size=(2, 2), name='pool2'))
 
     model.add(Flatten(name='flatten'))
     model.add(Dense(256, activation='relu', name='dense1'))
     model.add(Dropout(0.5, name='dropout3'))
     model.add(Dense(10, activation='softmax', name='dense2'))
-
 
     return model

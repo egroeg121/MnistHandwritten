@@ -1,3 +1,21 @@
+
+'''
+
+GENERAL Description:
+ trains a chosen network using the input data. It tests against the test dataset on every epoch.
+ Then saves weights to a hdf5 at the output directory
+
+COMMAND LINE ARGUMENTS:]
+    RUN_DIR MODEL_PATH TRAIN_DIR_HDF5 TEST_DIR_HDF5 OUTPUT_WEIGHTS_DIR
+
+        DIR stands for directory
+        the HDF5 must have an images and labels dataset
+    Or as module calling the different functions with correct parameters
+
+    To change train parameters like number of epochs etc look at the train function
+
+'''
+
 def main(run_dir,model_path,train_dir,test_dir,weights_dir):
 
     # Load data from hdf5
@@ -13,8 +31,8 @@ def main(run_dir,model_path,train_dir,test_dir,weights_dir):
     # Train data
     model = train(model_path,train_images,train_labels,test_images,test_labels)
 
-    # Save weights
-    model.save_weights(weights_dir)
+    # Save Weights
+    save_weights(model,weights_dir)
 
 def train(model_path,train_images,train_labels,test_images,test_labels):
     from keras import callbacks
@@ -44,6 +62,11 @@ def train(model_path,train_images,train_labels,test_images,test_labels):
     )
 
     return model
+
+def save_weights(model,weights_dir):
+    # Save weights
+    model.save_weights(weights_dir)
+
 
 def load_model(model_path):
     import importlib.util

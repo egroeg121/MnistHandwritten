@@ -1,4 +1,16 @@
-def main(run_dir,model_path,weights_dir,data_dir):
+
+'''
+
+PREDICT: Use previous calculated weights to create predictions for a dataset. Produces probabilities for each class and saves in hdf5
+    Can be used with command line arguements: [0]RUN_DIR [1]MODEL_PATH [2]WEIGHTS_HDF5_DIR [3]DATA_HDF5_DIR [4]OUTPUT_PREDICTS_DIR
+        DIR stands for directory
+        the HDF5 must have an images and labels dataset
+    Or as module calling the different functions with correct parameters
+
+'''
+
+
+def main(run_dir,model_path,weights_dir,data_dir,predicts_dir):
 
     # Load data from hdf5
     data_images, data_labels = load_data(data_dir)
@@ -8,7 +20,10 @@ def main(run_dir,model_path,weights_dir,data_dir):
     print("Images: ",data_images.shape,"   Labels: ",data_labels.shape,"\n")
 
     # Train data
-    predicts = predict(model_path,weights_dir,data_images)
+    predictions = predict(model_path,weights_dir,data_images)
+
+    # Save Predictions
+    save_predictions(predictions,predicts_dir)
 
 def predict(model_path,weights_dir,data_images):
     from keras.optimizers import SGD
@@ -36,6 +51,14 @@ def predict(model_path,weights_dir,data_images):
 
     return predicts
 
+def save_predictions(predictions,predicts_dir):
+    import h5py
+
+    f = h5py.File(predicts_dir, "w")
+    predicts_dset = f.create_dataset("predicts", data=predictions)
+    f.close()
+
+
 def load_model(model_path):
     import importlib.util
 
@@ -60,8 +83,8 @@ def load_data(input_dir):
 
 # If running from terminal
 import sys
-if len(sys.argv) != 4:
+if len(sys.argv) != 5:
     print("ERROR: Incorrect number of Arguments. Input Arguements: ",len(sys.argv))
-    print("Sys Arg: [0]FILE.PY [1]MODEL_PATH [2]WEIGHTS_PATH [3]DATA_PATH")
+    print("Sys Arg: [0]RUN_DIR [1]MODEL_PATH [2]WEIGHTS_HDF5_DIR [3]DATA_HDF5_DIR [4]OUTPUT_PREDICTS_DIR")
     exit()
-if __name__ == "__main__": main(sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3])
+if __name__ == "__main__": main(sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4])
