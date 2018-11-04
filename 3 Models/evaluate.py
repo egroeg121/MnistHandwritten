@@ -50,7 +50,7 @@ def evaluate(model_path,weights_dir,data_images,data_labels):
     #logger = callbacks.TensorBoard(log_dir='logs', write_graph=True,histogram_freq=5)
 
     # train
-    loss,accuracy = model.evalaute(
+    loss,accuracy = model.evaluate(
         data_images,
         data_labels,
         batch_size=500,

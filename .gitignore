@@ -1,4 +1,4 @@
 *.idx3-ubyte
 *.idx1-ubyte
-
+idea/
 *.hdf5

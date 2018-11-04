@@ -1,6 +1,6 @@
-import matplotlib
+from PIL import Image
+import numpy as np
 import matplotlib.pyplot as plt
-from Pillow import Image
 
 
 def load_data(input_dir):
@@ -18,12 +18,17 @@ def load_data(input_dir):
 
 
 def main():
-    data_images, data_labels = load_data("1 Data processing\P")
-    im = Image.fromarray(data_images[0])
-    #digit = data_images[37000]
-    #digit_image = digit.reshape(28, 28)
+    print("starting")
+    dir = "0 Data\\Processed data\\NoProcessing_train.hdf5"
+    data_images, data_labels = load_data(dir)
 
-    #plt.imshow(im, cmap=matplotlib.cm.binary, interpolation="nearest")
-    im.show()
-    plt.axis("off")
+    fig = plt.figure(figsize=(2,5))
+    for i in range(10):
+        im = Image.fromarray(np.reshape(data_images[i], (28, 28)),'L')
+        #im.show()
+        fig.add_subplot(2,5,i+1)
+        plt.imshow(im)
+
     plt.show()
+
+if __name__ == "__main__": main()
