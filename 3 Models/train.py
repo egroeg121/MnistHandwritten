@@ -18,9 +18,16 @@ COMMAND LINE ARGUMENTS:]
 
 def main(run_dir,model_path,train_dir,test_dir,weights_dir):
 
+    from FuncLib import hdf5_functions
+
     # Load data from hdf5
-    train_images,train_labels = load_data(train_dir)
-    test_images,test_labels = load_data(test_dir)
+    #train_images,train_labels = load_data(train_dir)
+    train_data = hdf5_functions.read(train_dir,("images","labels"))
+    train_images = train_data[0]
+    train_labels = train_data[1]
+    test_data = hdf5_functions.read(test_dir, ("images", "labels"))
+    test_images = test_data[0]
+    test_labels = test_data[1]
 
     # Display Data sizes
     print( "Shape of train data:")

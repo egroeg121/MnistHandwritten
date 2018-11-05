@@ -1,4 +1,6 @@
 *.idx3-ubyte
 *.idx1-ubyte
-idea/
+.idea/
 *.hdf5
+*.iml
+*.xml
